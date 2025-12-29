@@ -1,0 +1,11 @@
+[project]
+name = "kulimweb"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "kulim @ git+https://github.com/jake1104/KULIM.git",
+    "uvicorn>=0.38.0",
+]

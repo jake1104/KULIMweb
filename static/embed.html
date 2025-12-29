@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>KULIMweb</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+
+    <body
+        class="bg-zinc-50 text-zinc-950 border-2 border-zinc-300 rounded-[64px]"
+    >
+        <div class="max-w-5xl mx-auto p-10 space-y-10">
+        <!-- Header -->
+        <header class="space-y-2 mt-2">
+            <h1 class="text-3xl font-bold text-indigo-400">KULIM</h1>
+            <p class="text-zinc-700">형태소 분석 · 문장 성분 분석</p>
+        </header>
+
+        <!-- Input -->
+        <section class="space-y-3">
+            <textarea
+            id="inputText"
+            class="w-full h-32 p-4 bg-zinc-200 border border-zinc-300 rounded-[30px] focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            placeholder="분석할 한국어 문장을 입력하세요."
+            ></textarea>
+
+            <div class="flex gap-4">
+            <button
+                onclick="run()"
+                class="px-5 py-2 bg-indigo-200 hover:bg-indigo-300 text-zinc-700 rounded-full font-semibold"
+            >
+                분석
+            </button>
+            </div>
+        </section>
+
+        <!-- Morph Result -->
+        <section>
+            <h2 class="text-xl font-semibold mb-3 text-zinc-700">형태소 분석</h2>
+            <div
+            id="morphResult"
+            class="flex flex-wrap gap-3 bg-zinc-200 border border-zinc-300 p-4 rounded-[30px] min-h-[60px]"
+            ></div>
+        </section>
+
+        <!-- Syntax Result -->
+        <section>
+            <h2 class="text-xl font-semibold mb-3 text-zinc-700">문장 성분 분석</h2>
+            <div
+            id="syntaxResult"
+            class="flex flex-wrap gap-3 bg-zinc-200 border border-zinc-300 p-4 rounded-[30px] min-h-[60px]"
+            ></div>
+        </section>
+        </div>
+
+        <script>
+            morph_kr = {
+                "NNG": "일반명사",
+                "NNP": "고유명사",
+                "NNB": "의존명사",
+                "NP": "대명사",
+                "NR": "수사",
+                "VV": "동사",
+                "VA": "형용사",
+                "VX": "보조용언",
+                "VCP": "긍정지정사",
+                "VCN": "부정지정사",
+                "MMA": "성상 관형사",
+                "MMD": "지시 관형사",
+                "MMN": "수 관형사",
+                "MAG": "일반부사",
+                "MAJ": "접속부사",
+                "IC": "감탄사",
+                "JKS": "주격조사",
+                "JKC": "보격조사",
+                "JKG": "관형격조사",
+                "JKO": "목적격조사",
+                "JKB": "부사격조사",
+                "JKV": "호격조사",
+                "JKQ": "인용격조사",
+                "JX": "보조사",
+                "JC": "접속조사",
+                "EP": "선어말어미",
+                "EF": "종결어미",
+                "EC": "연결어미",
+                "ETN": "명사형전성어미",
+                "ETM": "관형형전성어미",
+                "XPN": "체언접두사",
+                "XSN": "명사파생접미사",
+                "XSV": "동사파생접미사",
+                "XSA": "형용사파생접미사",
+                "XR": "어근",
+                "SF": "(마침표, 물음표, 느낌표)",
+                "SP": "(쉼표, 가운뎃점, 콜론, 빗금)",
+                "SS": "(따옴표, 괄호표, 줄표)",
+                "SE": "줄임표",
+                "SO": "붙임표(물결)",
+                "SW": "기타 기호",
+                "SL": "외국어",
+                "SH": "한자",
+                "SN": "숫자",
+                "NA": "분석불능범주"
+            }
+
+            function sendHeight() {
+                const height = document.body.scrollHeight;
+                window.parent.postMessage({ type: "setHeight", height: height }, "*");
+            }
+
+            window.addEventListener("load", sendHeight);
+            window.addEventListener("resize", sendHeight);
+
+            // Create a MutationObserver to listen for content changes
+            const observer = new MutationObserver(sendHeight);
+            observer.observe(document.body, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+            });
+
+            function run() {
+                runMorph();
+                runSyntax();
+            }
+            async function runMorph() {
+                const inputText = document.getElementById("inputText").value;
+                const res = await fetch("/api/morph", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: inputText }),
+                });
+                const data = await res.json();
+                console.log(data);
+
+                const container = document.getElementById("morphResult");
+                container.innerHTML = "";
+
+                data.forEach((t) => {
+                const el = document.createElement("div");
+                el.className =
+                    "px-3 py-1 rounded-full bg-emerald-200 text-zinc-900 border border-emerald-300 text-sm flex gap-2";
+                el.innerHTML = `<span>${t.surface}</span><span class="opacity-70">[${morph_kr[t.pos] || t.pos}]</span>`;
+                container.appendChild(el);
+                });
+                sendHeight();
+            }
+
+            async function runSyntax() {
+                const inputText = document.getElementById("inputText").value;
+                const res = await fetch("/api/syntax", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: inputText }),
+                });
+                const data = await res.json();
+                console.log(data);
+
+                const container = document.getElementById("syntaxResult");
+                container.innerHTML = "";
+
+                data.forEach((c) => {
+                    const el = document.createElement("div");
+                    el.className =
+                        "px-3 py-1 rounded-full bg-emerald-200 text-zinc-900 border border-emerald-300 text-sm flex gap-2";
+                    c[1] = c[1].split("+");
+                    el.innerHTML = `<span>${c[0]}</span><span class="opacity-70">[${c[1].map((p) => morph_kr[p] || p).join("+")}] ${c[2] || ""}</span>`;
+                    container.appendChild(el);
+                });
+                sendHeight();
+            }
+        </script>
+    </body>
+</html>
