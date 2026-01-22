@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi",
-    "grammar @ https://github.com/jake1104/KULIM/releases/download/v0.1.0-rc.9/grammar-0.1.0rc9-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+    "grammar @ https://github.com/jake1104/KULIM/releases/download/v0.1.0/grammar-0.1.0-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
     "hangul @ https://github.com/jake1104/KULIM/releases/download/v0.1.0-rc.9/hangul-0.0.1-py3-none-any.whl",
     "kulim @ https://github.com/jake1104/KULIM/releases/download/v0.1.0-rc.9/kulim-0.1.0rc9-py3-none-any.whl",
     "uvicorn>=0.38.0",
