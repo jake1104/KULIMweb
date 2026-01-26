@@ -1,3 +1,2 @@
 fastapi
 uvicorn
-kulim @ git+https://github.com/jake1104/KULIM.git
