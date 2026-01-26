@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>KULIMweb</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+
+    <body class="w-[800px] h-[800px] flex items-center justify-center">
+        <div class="w-full h-full">
+            <div class="flex h-10 items-end">
+                <div class="h-8 bg-zinc-200 rounded-t-[16px] pt-1">
+                    <a href="/grammar_embed" class="text-zinc-600 font-semibold text-center px-4">형태소 분석 · 문장 성분 분석</a>
+                </div>
+                <div class="h-10 bg-zinc-300 rounded-t-[16px] pt-1">
+                    <a class="text-zinc-600 font-semibold text-center px-4">발음</a>
+                </div>
+                <div class="h-8 bg-zinc-200 rounded-t-[16px] pt-1">
+                    <a href="/romanization_embed" class="text-zinc-600 font-semibold text-center px-4">로마자 표기</a>
+                </div>
+            </div>
+            <div
+                class="bg-zinc-100 text-zinc-950 shadow-lg rounded-b-[64px] rounded-tr-[64px]"
+            >
+                <div class="max-w-5xl mx-auto p-10 space-y-10">
+                    <!-- Header -->
+                    <header class="space-y-2 mt-2">
+                        <h1 class="text-3xl font-bold text-indigo-400">KULIM</h1>
+                        <p class="text-zinc-700">발음 표기</p>
+                    </header>
+
+                    <!-- Input -->
+                    <section class="space-y-3">
+                        <textarea
+                        id="inputText"
+                        class="w-full h-32 p-4 bg-zinc-200 border border-zinc-300 rounded-[30px] focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                        placeholder="발음으로 변환할 한국어 문장을 입력하세요."
+                        ></textarea>
+
+                        <div class="flex gap-4">
+                        <button
+                            onclick="run()"
+                            class="px-5 py-2 bg-indigo-200 hover:bg-indigo-300 text-zinc-700 rounded-full font-semibold"
+                        >
+                            변환
+                        </button>
+                        </div>
+                    </section>
+
+                    <!-- Pronunciation Result -->
+                    <section>
+                        <h2 class="text-xl font-semibold mb-3 text-zinc-700">발음</h2>
+                        <div
+                        id="pronunciationResult"
+                        class="flex flex-wrap gap-3 bg-zinc-200 border border-zinc-300 p-4 rounded-[30px] min-h-[60px]"
+                        ></div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function sendHeight() {
+                const height = document.body.scrollHeight;
+                window.parent.postMessage({ type: "setHeight", height: height }, "*");
+            }
+
+            window.addEventListener("load", sendHeight);
+            window.addEventListener("resize", sendHeight);
+
+            // Create a MutationObserver to listen for content changes
+            const observer = new MutationObserver(sendHeight);
+            observer.observe(document.body, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+            });
+
+            function run() {
+                runPronunciation();
+            }
+            async function runPronunciation() {
+                const inputText = document.getElementById("inputText").value;
+                const res = await fetch("/api/pronunciation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: inputText }),
+                });
+                const data = await res.json();
+                console.log(data);
+
+                const container = document.getElementById("pronunciationResult");
+                container.innerHTML = `<span>${data}</div>`;
+
+                sendHeight();
+            }
+        </script>
+    </body>
+</html>
